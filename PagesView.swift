@@ -256,12 +256,15 @@ struct HelpView: View {
             Color.clear
                 .ignoresSafeArea()
             
-            VStack {
+            VStack(spacing: 20) {
                 Text("what is pomodoro?")
                     .font(.title)
                     .bold()
                 Text("Pomodoro is a technique that helps you stay focused and productive by using timed work sessions. Use the timer to work for 25 minutes, then take a 5-minute break. After four sessions, take a longer break to recharge. It’s a simple way to stay consistent, avoid burnout, and make progress one step at a time.")
+                
+                Text("The Pomodoro Technique also emphasizes tracking each completed session, known as a “pomodoro,” to build awareness of how you spend your time. This helps you estimate workload more accurately and identify when you tend to lose focus. Between sessions, short breaks are used to reset mentally without losing momentum, while longer breaks after multiple cycles prevent cognitive fatigue. Many people adapt the method by adjusting session length, break duration, or the number of cycles to match their personal rhythm. The core principle remains the same: work in short, deliberate intervals with structured recovery to maintain consistent, high-quality focus.")
             }
+            .padding(40)
             .frame(width: 500, height: 475)
             .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
             .padding(.bottom, 30)
