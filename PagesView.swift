@@ -14,12 +14,17 @@ struct PomodoroView: View {
     @State private var timeRemaining: Int = 1500 // 25 min
     @State private var isRunning: Bool = false
     @State private var timer: Timer? = nil
+    @State private var quote: String = ""
+    @State private var takeBreak: Bool = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.clear.ignoresSafeArea()
             
             VStack(spacing: 20) {
+                // MARK: Inspirational Quote Display
+                Text(quote)
+                
                 // MARK: Timer Display
                 TextField("", text: Binding(
                     get: { formatTime(timeRemaining) },
@@ -64,10 +69,17 @@ struct PomodoroView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                
+                // MARK: Break Recommendation Display
+                
             }
+            .padding(40)
             .frame(width: 500, height: 475)
             .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
             .padding(.bottom, 30)
+            .task {
+                await getQuote()
+            }
             
             // MARK: Confirmation Popup
             if showResetConfirmation {
@@ -88,7 +100,7 @@ struct PomodoroView: View {
 }
 
 extension PomodoroView {
-    // MARK: - Timer Logic
+    // MARK: Timer Logic
     func startTimer() {
         isRunning = true
         timer?.invalidate()
@@ -121,7 +133,7 @@ extension PomodoroView {
         timeRemaining = 1500
     }
     
-    // MARK: - Time Formatting
+    // MARK: Time Formatting
     func formatTime(_ seconds: Int) -> String {
         let minutes = seconds / 60
         let secs = seconds % 60
@@ -136,6 +148,26 @@ extension PomodoroView {
               m >= 0, s >= 0 else { return 0 }
         return m * 60 + s
     }
+    
+    // MARK: Inspirational Quote Logic
+    struct QuoteResponse: Decodable {
+        let id: Int
+        let quote: String
+    }
+    
+    func getQuote() async {
+        guard let url = URL(string: "http://127.0.0.1:5000/api/quote") else { return }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoded = try JSONDecoder().decode(QuoteResponse.self, from: data)
+            quote = decoded.quote
+        } catch {
+            print("Failed to get quote:", error)
+        }
+    }
+    
+    // MARK: Break Recommendation Logic
 }
 
 struct ResetConfirmationPopup: View {
@@ -192,8 +224,11 @@ struct StatsView: View {
             Color.clear
                 .ignoresSafeArea()
             VStack(spacing: 12) {
-
+                    Text("pomodoro stats")
+                        .font(.title)
+                        .bold()
             }
+            .padding(40)
             .frame(width: 500, height: 475)
             .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
             .padding(.bottom, 30)
@@ -243,6 +278,7 @@ struct SignInView: View {
                     .foregroundColor(.blue)
                     .padding(.top, 4)
                 }
+                .padding(40)
                 .frame(width: 500, height: 475)
                 .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
                 .padding(.bottom, 30)

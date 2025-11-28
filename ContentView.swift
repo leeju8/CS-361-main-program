@@ -34,7 +34,7 @@ struct ContentView: View {
             if selectedTab == 0 {
                 PomodoroView(
                     showResetConfirmation: $showResetConfirmation,
-                    skipResetConfirmation: $skipResetConfirmation
+                    skipResetConfirmation: $skipResetConfirmation,
                 )
             } else if selectedTab == 1 {
                 StatsView()
