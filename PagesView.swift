@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct PomodoroView: View {
+    @Binding var showResetConfirmation: Bool
+    @Binding var skipResetConfirmation: Bool
+
     @State private var timeRemaining: Int = 1500 // 25 min
     @State private var isRunning: Bool = false
-    @State private var showResetConfirmation: Bool = false
-    @State private var skipResetConfirmation: Bool = false
     @State private var timer: Timer? = nil
 
     var body: some View {
@@ -64,7 +65,7 @@ struct PomodoroView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .frame(width: 400, height: 275)
+            .frame(width: 500, height: 475)
             .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
             .padding(.bottom, 30)
             
@@ -185,6 +186,21 @@ struct ColoredButtonStyle: ButtonStyle {
     }
 }
 
+struct StatsView: View {
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color.clear
+                .ignoresSafeArea()
+            VStack(spacing: 12) {
+
+            }
+            .frame(width: 500, height: 475)
+            .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
+            .padding(.bottom, 30)
+        }
+    }
+}
+
 struct SignInView: View {
     @State private var username: String = ""
     @State private var password: String = ""
@@ -227,8 +243,8 @@ struct SignInView: View {
                     .foregroundColor(.blue)
                     .padding(.top, 4)
                 }
-                .frame(width: 400, height: 275)
-                .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
+                .frame(width: 500, height: 475)
+                .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
                 .padding(.bottom, 30)
             }
         }
@@ -246,9 +262,10 @@ struct HelpView: View {
                     .bold()
                 Text("Pomodoro is a technique that helps you stay focused and productive by using timed work sessions. Use the timer to work for 25 minutes, then take a 5-minute break. After four sessions, take a longer break to recharge. It’s a simple way to stay consistent, avoid burnout, and make progress one step at a time.")
             }
-            .frame(width: 400, height: 275)
-            .background(Color.gray.opacity(0.2), in: RoundedRectangle(cornerRadius: 8))
+            .frame(width: 500, height: 475)
+            .background(Color.gray.opacity(0.15), in: RoundedRectangle(cornerRadius: 16))
             .padding(.bottom, 30)
         }
     }
 }
+

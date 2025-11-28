@@ -9,35 +9,42 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = 0
-    
+    @State private var showResetConfirmation: Bool = false
+    @State private var skipResetConfirmation: Bool = false
+
     var body: some View {
         VStack {
             HStack {
                 Button("pomodoro") {
                     selectedTab = 0
                 }
-                .frame(maxHeight: .infinity)
-                
-                Button("sign in") {
+                Button("stats") {
                     selectedTab = 1
                 }
-                Button("help") {
+                Button("sign in") {
                     selectedTab = 2
+                }
+                Button("help") {
+                    selectedTab = 3
                 }
             }
             .frame(height: 30)
             .background(Color.gray, in: RoundedRectangle(cornerRadius: 8))
+            
+            if selectedTab == 0 {
+                PomodoroView(
+                    showResetConfirmation: $showResetConfirmation,
+                    skipResetConfirmation: $skipResetConfirmation
+                )
+            } else if selectedTab == 1 {
+                StatsView()
+            } else if selectedTab == 2{
+                SignInView()
+            } else {
+                HelpView()
+            }
         }
         .padding(.top, 30)
-        
-        
-        if selectedTab == 0 {
-            PomodoroView()
-        } else if selectedTab == 1 {
-            SignInView()
-        } else {
-            HelpView()
-        }
     }
 }
 
