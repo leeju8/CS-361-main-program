@@ -15,6 +15,7 @@ struct PomodoroView: View {
     @State private var isRunning: Bool = false
     @State private var timer: Timer? = nil
     @State private var quote: String = ""
+    @State private var date: String = ""
     @State private var takeBreak: Bool = false
 
     var body: some View {
@@ -22,6 +23,9 @@ struct PomodoroView: View {
             Color.clear.ignoresSafeArea()
             
             VStack(spacing: 20) {
+                // MARK: Date Display
+                Text(date).fontWeight(.semibold)
+                
                 // MARK: Inspirational Quote Display
                 Text(quote)
                 
@@ -79,6 +83,7 @@ struct PomodoroView: View {
             .padding(.bottom, 30)
             .task {
                 await getQuote()
+                await getDate()
             }
             
             // MARK: Confirmation Popup
@@ -164,6 +169,23 @@ extension PomodoroView {
             quote = decoded.quote
         } catch {
             print("Failed to get quote:", error)
+        }
+    }
+    
+    // MARK: Date Retreival Logic
+    struct DateResponse: Decodable {
+        let date: String
+    }
+    
+    func getDate() async {
+        guard let url = URL(string: "http://localhost:8081/date") else { return }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoded = try JSONDecoder().decode(DateResponse.self, from: data)
+            date = decoded.date
+        } catch {
+            print("Failed to get date:", error)
         }
     }
     
