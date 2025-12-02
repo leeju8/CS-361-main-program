@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var model: ProductivityModel
     @State private var selectedTab = 0
     @State private var showResetConfirmation: Bool = false
     @State private var skipResetConfirmation: Bool = false
@@ -35,9 +36,10 @@ struct ContentView: View {
                 PomodoroView(
                     showResetConfirmation: $showResetConfirmation,
                     skipResetConfirmation: $skipResetConfirmation,
-                )
+                ).environmentObject(model)
             } else if selectedTab == 1 {
                 StatsView()
+                    .environmentObject(model)
             } else if selectedTab == 2{
                 SignInView()
             } else {
@@ -48,6 +50,3 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-}
