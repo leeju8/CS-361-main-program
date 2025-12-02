@@ -17,14 +17,15 @@ struct PomodoroView: View {
     @State private var quote: String = ""
     @State private var date: String = ""
     @State private var takeBreak: Bool = false
+    @EnvironmentObject var model: ProductivityModel
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.clear.ignoresSafeArea()
             
             VStack(spacing: 20) {
-                // MARK: Date Display
-                Text(date).fontWeight(.semibold)
+                // MARK: Date/Stats Display
+                Text(date).fontWeight(.bold)
                 
                 // MARK: Inspirational Quote Display
                 Text(quote)
@@ -33,7 +34,7 @@ struct PomodoroView: View {
                 TextField("", text: Binding(
                     get: { formatTime(timeRemaining) },
                     set: { newValue in
-                        timeRemaining = parseTime(from: newValue)
+                        timeRemaining = max(parseTime(from: newValue), 0)
                     }
                 ))
                 .font(.system(size: 64, weight: .bold, design: .rounded))
@@ -110,11 +111,17 @@ extension PomodoroView {
         isRunning = true
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if timeRemaining > 0 {
+            print("timer sees:", timeRemaining)
+            if timeRemaining > 1 {
                 timeRemaining -= 1
             } else {
+                timeRemaining = 0
                 timer?.invalidate()
                 isRunning = false
+                
+                Task {
+                    await incrementProductivityStats()
+                }
             }
         }
     }
@@ -189,6 +196,31 @@ extension PomodoroView {
         }
     }
     
+    // MARK: Productivity Statistics Logic
+    struct ProductivityStatsResponse: Decodable {
+        let totalSessions: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case totalSessions = "total_sessions"
+        }
+    }
+    
+    func incrementProductivityStats() async {
+        guard let url = URL(string: "http://localhost:8082/stats") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let decoded = try JSONDecoder().decode(ProductivityStatsResponse.self, from: data)
+            model.totalSessions = decoded.totalSessions
+        } catch {
+            print("Failed to increment productivity stats:", error)
+        }
+    }
+    
     // MARK: Break Recommendation Logic
 }
 
@@ -241,6 +273,8 @@ struct ColoredButtonStyle: ButtonStyle {
 }
 
 struct StatsView: View {
+    @EnvironmentObject var model: ProductivityModel
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.clear
@@ -249,6 +283,7 @@ struct StatsView: View {
                     Text("pomodoro stats")
                         .font(.title)
                         .bold()
+                Text("total sessions: \(model.totalSessions)")
             }
             .padding(40)
             .frame(width: 500, height: 475)
