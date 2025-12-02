@@ -76,7 +76,10 @@ struct PomodoroView: View {
                 }
                 
                 // MARK: Break Recommendation Display
-                
+                if takeBreak {
+                    Text("time to take a break! :3")
+                        .bold()
+                }
             }
             .padding(40)
             .frame(width: 500, height: 475)
@@ -121,6 +124,7 @@ extension PomodoroView {
                 
                 Task {
                     await incrementProductivityStats()
+                    await recommendBreak()
                 }
             }
         }
@@ -222,6 +226,46 @@ extension PomodoroView {
     }
     
     // MARK: Break Recommendation Logic
+    struct BreakRecommendationRequest: Codable {
+        let totalSessions: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case totalSessions = "total_sessions"
+        }
+    }
+    
+    struct BreakRecommendationResponse: Decodable {
+        let takeBreak: Bool
+        
+        enum CodingKeys: String, CodingKey {
+            case takeBreak = "take_break"
+        }
+    }
+    
+    func recommendBreak() async {
+        guard let url = URL(string: "http://localhost:8083/break") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let breakRecommendationRequestData = BreakRecommendationRequest(totalSessions: model.totalSessions)
+        do {
+            let jsonData = try JSONEncoder().encode(breakRecommendationRequestData)
+            request.httpBody = jsonData
+        } catch {
+            print("Error encoding JSON: \(error)")
+            return
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let decoded = try JSONDecoder().decode(BreakRecommendationResponse.self, from: data)
+            takeBreak = decoded.takeBreak
+        } catch {
+            print("Failed to retrieve break recommendation:", error)
+        }
+    }
 }
 
 struct ResetConfirmationPopup: View {
